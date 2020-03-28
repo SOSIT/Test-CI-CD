@@ -1,4 +1,4 @@
 FROM openjdk:11.0.6-jdk-stretch
 VOLUME /tmp
-COPY tmp/*.jar app.jar
+COPY . .
 ENTRYPOINT exec java -jar /app.jar 
