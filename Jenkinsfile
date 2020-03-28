@@ -1,42 +1,50 @@
-node {
-    def app
-
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
-    }
-
-    stage('Compilazione') {
-        /* Let's make sure we have the repository cloned to our workspace */
-
-        sh "./gradlew build --no-daemon" //run a gradle task
-    }
-
-    stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
-
-        app = docker.build("sschiavottiello/sosit.repo.docker")
-    }
-
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * For this example, we're using a Volkswagen-type approach ;-) */
-
-        app.inside {
-            sh 'echo "Tests passed"'
+pipeline {
+    agent any
+    stages {
+        stage('Clone repository') {
+            checkout scm
         }
-    }
-
-    stage('Push image') {
-        /* Finally, we'll push the image with two tags:
-         * First, the incremental build number from Jenkins
-         * Second, the 'latest' tag.
-         * Pushing multiple tags is cheap, as all the layers are reused. */
-        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
+        stage("Compile") {
+            steps {
+                sh "./gradlew compileJava"
+            }
         }
+        stage("Unit test") {
+            steps {
+                sh "./gradlew test"
+            }
+        }
+        stage("Package") {
+            steps {
+                sh "./gradlew build"
+            }
+        }
+        stage("Docker build") {
+            steps {
+                sh "docker build -t sschiavottiello/testcicd ."
+            }
+        }
+        /*stage("Docker push") {
+            steps {
+                sh "docker login -u username -p password"
+                sh "docker push nikhilnidhi/calculator_1"
+            }
+        }*/
+        stage("Deploy to staging") {
+            steps {
+                sh "docker run -d --rm --name testcicd sschiavottiello/testcicd"
+            }
+        }
+        /*stage("Acceptance test") {
+            steps {
+                sleep 60
+                sh "./acceptance_test.sh"
+            }
+        }*/
     }
+    /*post {
+        always {
+            sh "docker stop calculator_1"
+        }
+    }*/
 }
