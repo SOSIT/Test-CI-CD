@@ -10,7 +10,7 @@ node {
     stage('Compilazione') {
         /* Let's make sure we have the repository cloned to our workspace */
 
-        sh './gradlew build --no-daemon' //run a gradle task
+        sh "./gradlew build --no-daemon" //run a gradle task
     }
 
     stage('Build image') {
