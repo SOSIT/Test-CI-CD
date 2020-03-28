@@ -1,42 +1,51 @@
 node {
-    stage('Clone repository') {
-        checkout scm
-    }
-    stage("Compile") {
-        steps {
-            sh "./gradlew compileJava"
+    stages {
+        stage('Clone repository') {
+            steps {
+                checkout scm
+            }
         }
-    }
-    stage("Unit test") {
-        steps {
-            sh "./gradlew test"
+        stage("Compile") {
+            steps {
+                sh "./gradlew compileJava"
+            }
         }
-    }
-    stage("Package") {
-        steps {
-            sh "./gradlew build"
+        stage("Unit test") {
+            steps {
+                sh "./gradlew test"
+            }
         }
-    }
-    stage("Docker build") {
-        steps {
-            sh "docker build -t sschiavottiello/testcicd ."
+        stage("Package") {
+            steps {
+                sh "./gradlew build"
+            }
         }
-    }
-    /*stage("Docker push") {
-        steps {
-            sh "docker login -u username -p password"
-            sh "docker push nikhilnidhi/calculator_1"
+        stage("Docker build") {
+            steps {
+                sh "docker build -t sschiavottiello/testcicd ."
+            }
         }
-    }*/
-    stage("Deploy to staging") {
-        steps {
-            sh "docker run -d --rm --name testcicd sschiavottiello/testcicd"
+        /*stage("Docker push") {
+            steps {
+                sh "docker login -u username -p password"
+                sh "docker push nikhilnidhi/calculator_1"
+            }
+        }*/
+        stage("Deploy to staging") {
+            steps {
+                sh "docker run -d --rm --name testcicd sschiavottiello/testcicd"
+            }
         }
+        /*stage("Acceptance test") {
+            steps {
+                sleep 60
+                sh "./acceptance_test.sh"
+            }
+        }*/
     }
-    /*stage("Acceptance test") {
-        steps {
-            sleep 60
-            sh "./acceptance_test.sh"
+    /*post {
+        always {
+            sh "docker stop calculator_1"
         }
     }*/
 }
