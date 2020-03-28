@@ -7,6 +7,12 @@ node {
         checkout scm
     }
 
+    stage('Compilazione') {
+        /* Let's make sure we have the repository cloned to our workspace */
+
+        ./gradlew build
+    }
+
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
